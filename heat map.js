@@ -3,8 +3,8 @@ let width = d3.select("svg").attr("width");
 let height = d3.select("svg").attr("height");
 
 let months = [
-  "Janurary",
-  "Feburary",
+  "January",
+  "February",
   "March",
   "April",
   "May",
@@ -19,7 +19,7 @@ let months = [
 
 d3.json(
   "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json"
-).then(function(data) {
+).then(function (data) {
   let years = [];
   for (var a = 0; a < data.monthlyVariance.length; a++) {
     years.push(data.monthlyVariance[a].year);
@@ -47,61 +47,63 @@ d3.json(
 
   var xScale = d3
     .scaleLinear()
-    .domain([d3.min(years), d3.max(years)])
+    .domain([d3.min(years), d3.max(years) + 1])
     .range([58, width - 100]);
 
   d3.select("svg")
     .append("g")
-    .attr("transform", "translate(0, 520)")
+    .attr("transform", "translate(0, 480)")
     .attr("id", "x-axis")
     .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
   var yScale = d3
-    .scaleLinear()
-    .domain([0, 12])
+    .scaleBand()
+    .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
     .range([0, height - 120]);
 
   d3.select("svg")
     .append("g")
-    .attr("transform", "translate(58, 40)")
+    .attr("transform", "translate(58, 0)")
     .attr("id", "y-axis")
     .call(
       d3
         .axisLeft(yScale)
-        .ticks(13)
-        .tickFormat(function(d, i) {
+        .ticks(12)
+        .tickFormat(function (d, i) {
           return months[i];
         })
     );
-
+  let giveMonth = function (e) {
+    return months[e];
+  };
   d3.select("svg")
     .selectAll("rect")
     .data(sortedData)
     .enter()
     .append("rect")
     .attr("class", "cell")
-    .attr("data-year", function(d, i) {
+    .attr("data-year", function (d, i) {
       return years[i];
     })
-    .attr("data-month", function(d, i) {
+    .attr("data-month", function (d, i) {
       return sortedData[i].month - 1;
     })
-    .attr("data-temp", function(d, i) {
+    .attr("data-temp", function (d, i) {
       return sortedData[i].variance;
     })
-    .attr("x", function(d, i) {
+    .attr("x", function (d, i) {
       return xScale(sortedData[i].year);
     })
-    .attr("y", function(d, i) {
-      return yScale(sortedData[i].month);
+    .attr("y", function (d, i) {
+      return yScale(sortedData[i].month - 1);
     })
-    .attr("width", function(d, i) {
+    .attr("width", function (d, i) {
       return width / yearsUnique.length;
     })
-    .attr("height", function(d, i) {
+    .attr("height", function (d, i) {
       return (height - 120) / 12;
     })
-    .style("fill", function(d, i) {
+    .style("fill", function (d, i) {
       if (sortedData[i].variance <= -3) {
         return "red";
       } else if (sortedData[i].variance > -3 && sortedData[i].variance <= 0) {
@@ -112,7 +114,7 @@ d3.json(
         return "green";
       }
     })
-    .on("mouseover", function(d, i) {
+    .on("mouseover", function (d, i) {
       d3.select("#tooltip")
         .style("opacity", 0.8)
         .attr("data-year", sortedData[i].year)
@@ -120,14 +122,14 @@ d3.json(
           "Year: " +
             years[i] +
             "<br>" +
-            "Variance " +
-            sortedData[i].variance +
+            "Month: " +
+            giveMonth(sortedData[i].month - 1) +
             "<br>" +
-            "Month " +
-            sortedData[i].month
+            "Variance: " +
+            sortedData[i].variance
         );
     })
-    .on("mouseout", function(d, i) {
+    .on("mouseout", function (d, i) {
       d3.select("#tooltip").style("opacity", 0);
     });
 
@@ -144,15 +146,15 @@ d3.json(
     .data(colors)
     .enter()
     .append("rect")
-    .attr("x", function(d, i) {
+    .attr("x", function (d, i) {
       return 60 * i;
     })
-    .attr("y", function(d, i) {
+    .attr("y", function (d, i) {
       return 0;
     })
     .attr("height", 25)
     .attr("width", 60)
-    .style("fill", function(d, i) {
+    .style("fill", function (d, i) {
       return colors[i];
     });
 });
